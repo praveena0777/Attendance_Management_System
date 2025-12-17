@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Attendance Management System</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #f2f2f2;
+}
+.container {
+    width: 420px;
+    margin: 50px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px gray;
+}
+h2 {
+    text-align: center;
+}
+input, button {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+}
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+button:hover {
+    background: #0056b3;
+}
+.output {
+    background: #eee;
+    padding: 10px;
+    margin-top: 10px;
+}
+.hidden {
+    display: none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="container" id="loginPage">
+    <h2>Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<!-- MAIN PAGE -->
+<div class="container hidden" id="mainPage">
+    <h2>Attendance Management System</h2>
+
+    <h3>Add Student</h3>
+    <input type="text" id="sid" placeholder="Student ID">
+    <input type="text" id="sname" placeholder="Student Name">
+    <button onclick="addStudent()">Add Student</button>
+
+    <h3>Mark Attendance</h3>
+    <input type="text" id="aid" placeholder="Student ID">
+    <button onclick="mark('P')">Present</button>
+    <button onclick="mark('A')">Absent</button>
+
+    <h3>View Attendance</h3>
+    <input type="text" id="vid" placeholder="Student ID">
+    <button onclick="viewAttendance()">View</button>
+
+    <div class="output" id="output"></div>
+</div>
+
+<script>
+let students = JSON.parse(localStorage.getItem("students")) || {};
+let attendance = JSON.parse(localStorage.getItem("attendance")) || {};
+
+function login() {
+    let u = document.getElementById("username").value;
+    let p = document.getElementById("password").value;
+
+    if (u === "admin" && p === "admin123") {
+        document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("mainPage").classList.remove("hidden");
+    } else {
+        alert("Invalid Login");
+    }
+}
+
+function saveData() {
+    localStorage.setItem("students", JSON.stringify(students));
+    localStorage.setItem("attendance", JSON.stringify(attendance));
+}
+
+function addStudent() {
+    let id = document.getElementById("sid").value;
+    let name = document.getElementById("sname").value;
+
+    if (id === "" || name === "") {
+        alert("Enter all details");
+        return;
+    }
+
+    students[id] = name;
+    attendance[id] = [];
+    saveData();
+    alert("Student Added");
+}
+
+function mark(status) {
+    let id = document.getElementById("aid").value;
+    if (id in students) {
+        attendance[id].push(status);
+        saveData();
+        alert("Attendance Marked");
+    } else {
+        alert("Student not found");
+    }
+}
+
+function viewAttendance() {
+    let id = document.getElementById("vid").value;
+    let out = document.getElementById("output");
+
+    if (id in students) {
+        let total = attendance[id].length;
+        let present = attendance[id].filter(x => x === "P").length;
+        let percent = total === 0 ? 0 : (present / total) * 100;
+
+        out.innerHTML =
+            "<b>Name:</b> " + students[id] + "<br>" +
+            "<b>Total Classes:</b> " + total + "<br>" +
+            "<b>Present:</b> " + present + "<br>" +
+            "<b>Attendance %:</b> " + percent.toFixed(2);
+    } else {
+        out.innerHTML = "Student not found";
+    }
+}
+</script>
+
+</body>
+</html>
